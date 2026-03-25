@@ -6,7 +6,7 @@ This document describes the logical structure of the `bob` database based on `da
 
 The schema models a restaurant management system with these domains:
 
-- Restaurant core: restaurants and staff
+- Restaurant core: restaurants, users, and staff
 - Floor planning: floors and floor objects (tables, chairs, decor)
 - Menu management: menu folders and menu items
 - Reservation flow: reservations per table object
@@ -27,6 +27,7 @@ The schema models a restaurant management system with these domains:
 - `worker` -> `table_order` (1:N, nullable on order side)
 - `table_order` -> `table_order_line` (1:N)
 - `worker` -> `table_order_line` (1:N, nullable on order line side)
+- `user` -> `worker` (1:N)
 
 ## Tables
 
@@ -137,6 +138,24 @@ Indexes:
 - `idx_reservation_table` on `table_object_id`
 - `idx_reservation_time` on (`start_at`, `end_at`)
 
+### `user`
+
+Authentication users that can be linked to workers.
+
+Key columns:
+- `id` (PK, `binary(16)`)
+- `username` (`varchar(120)`, unique)
+- `password` (`varchar(255)`)
+- `role` (`varchar(40)`, default `STAFF`)
+- `created_at`
+
+Constraints:
+- `chk_user_username_nonempty`: `LENGTH(TRIM(username)) > 0`
+- `chk_user_role`: `role` in (`ADMIN`, `MANAGER`, `STAFF`)
+
+Indexes:
+- `idx_user_username` on `username`
+
 ### `worker`
 
 Restaurant employees (manager/waiter/chef, etc.).
@@ -144,12 +163,14 @@ Restaurant employees (manager/waiter/chef, etc.).
 Key columns:
 - `id` (PK)
 - `restaurant_id` (FK -> `restaurant.id`)
+- `user_id` (FK -> `user.id`, nullable)
 - `name`
 - `role`
 - `created_at`
 
 Indexes:
 - `idx_worker_restaurant` on `restaurant_id`
+- `idx_worker_user` on `user_id`
 
 ### `table_order`
 
@@ -190,6 +211,7 @@ Indexes:
 ## Foreign Key Delete Behavior
 
 - Most child entities use `ON DELETE CASCADE`.
+- This includes auth linkage: `worker.user_id` -> `user.id`.
 - Staff references in order flows use `ON DELETE SET NULL`:
   - `table_order.worker_id`
   - `table_order_line.placed_by_worker_id`
