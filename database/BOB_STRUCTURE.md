@@ -1,6 +1,6 @@
 # Bob Database Structure
 
-This document describes the logical structure of the `bob` database based on `database/bob-database.sql`.
+This document describes the INITIAL logical structure of the `bob` database based on `database/bob-database.sql`. The used structure is heavily modified with flyway migrations.
 
 ## Overview
 
@@ -36,11 +36,13 @@ The schema models a restaurant management system with these domains:
 Master entity for each restaurant.
 
 Key columns:
+
 - `id` (PK, `binary(16)`)
 - `name` (`varchar(120)`)
 - `created_at`, `updated_at`
 
 Indexes:
+
 - `idx_restaurant_name` on `name`
 
 ### `floor`
@@ -48,6 +50,7 @@ Indexes:
 Represents one editable floor/canvas of a restaurant.
 
 Key columns:
+
 - `id` (PK)
 - `restaurant_id` (FK -> `restaurant.id`)
 - `name`
@@ -56,6 +59,7 @@ Key columns:
 - `created_at`, `updated_at`
 
 Indexes:
+
 - `idx_floor_restaurant` on `restaurant_id`
 
 ### `floor_object`
@@ -63,6 +67,7 @@ Indexes:
 Objects placed on a floor (table/chair/decor/etc.).
 
 Key columns:
+
 - `id` (PK)
 - `floor_id` (FK -> `floor.id`)
 - `type`
@@ -72,6 +77,7 @@ Key columns:
 - `created_at`, `updated_at`
 
 Indexes:
+
 - `idx_floor_object_floor` on `floor_id`
 - `idx_floor_object_type` on `type`
 
@@ -80,6 +86,7 @@ Indexes:
 Hierarchical menu categories for a restaurant.
 
 Key columns:
+
 - `id` (PK)
 - `restaurant_id` (FK -> `restaurant.id`)
 - `parent_folder_id` (self FK -> `menu_folder.id`, nullable)
@@ -88,6 +95,7 @@ Key columns:
 - `created_at`
 
 Indexes:
+
 - `idx_menu_folder_restaurant` on `restaurant_id`
 - `idx_menu_folder_parent` on `parent_folder_id`
 
@@ -96,6 +104,7 @@ Indexes:
 Actual sellable items attached to menu folders.
 
 Key columns:
+
 - `id` (PK)
 - `folder_id` (FK -> `menu_folder.id`)
 - `name`
@@ -104,6 +113,7 @@ Key columns:
 - `created_at`
 
 Indexes:
+
 - `idx_menu_item_folder` on `folder_id`
 
 ### `opening_hour`
@@ -111,6 +121,7 @@ Indexes:
 Opening configuration per restaurant and weekday.
 
 Key columns:
+
 - `id` (PK)
 - `restaurant_id` (FK -> `restaurant.id`)
 - `day_of_week` (smallint)
@@ -118,6 +129,7 @@ Key columns:
 - `is_closed` (bit)
 
 Indexes and uniqueness:
+
 - `idx_opening_hour_restaurant` on `restaurant_id`
 - `uq_opening_hour_restaurant_day` unique on (`restaurant_id`, `day_of_week`)
 
@@ -126,6 +138,7 @@ Indexes and uniqueness:
 Guest reservation assigned to a table object.
 
 Key columns:
+
 - `id` (PK)
 - `table_object_id` (FK -> `floor_object.id`)
 - `guest_name`
@@ -135,6 +148,7 @@ Key columns:
 - `created_at`
 
 Indexes:
+
 - `idx_reservation_table` on `table_object_id`
 - `idx_reservation_time` on (`start_at`, `end_at`)
 
@@ -143,6 +157,7 @@ Indexes:
 Authentication users that can be linked to workers.
 
 Key columns:
+
 - `id` (PK, `binary(16)`)
 - `username` (`varchar(120)`, unique)
 - `password` (`varchar(255)`)
@@ -150,10 +165,12 @@ Key columns:
 - `created_at`
 
 Constraints:
+
 - `chk_user_username_nonempty`: `LENGTH(TRIM(username)) > 0`
 - `chk_user_role`: `role` in (`ADMIN`, `MANAGER`, `STAFF`)
 
 Indexes:
+
 - `idx_user_username` on `username`
 
 ### `worker`
@@ -161,6 +178,7 @@ Indexes:
 Restaurant employees (manager/waiter/chef, etc.).
 
 Key columns:
+
 - `id` (PK)
 - `restaurant_id` (FK -> `restaurant.id`)
 - `user_id` (FK -> `user.id`, nullable)
@@ -169,6 +187,7 @@ Key columns:
 - `created_at`
 
 Indexes:
+
 - `idx_worker_restaurant` on `restaurant_id`
 - `idx_worker_user` on `user_id`
 
@@ -177,6 +196,7 @@ Indexes:
 Order session for a table object.
 
 Key columns:
+
 - `id` (PK)
 - `table_object_id` (FK -> `floor_object.id`)
 - `worker_id` (FK -> `worker.id`, nullable)
@@ -185,6 +205,7 @@ Key columns:
 - `closed_at`
 
 Indexes:
+
 - `idx_table_order_table` on `table_object_id`
 - `idx_table_order_worker` on `worker_id`
 
@@ -193,6 +214,7 @@ Indexes:
 Individual line item within a table order.
 
 Key columns:
+
 - `id` (PK)
 - `table_order_id` (FK -> `table_order.id`)
 - `item_name`
@@ -205,6 +227,7 @@ Key columns:
 - `created_at`
 
 Indexes:
+
 - `idx_table_order_line_order` on `table_order_id`
 - `fk_table_order_line_worker` on `placed_by_worker_id`
 
