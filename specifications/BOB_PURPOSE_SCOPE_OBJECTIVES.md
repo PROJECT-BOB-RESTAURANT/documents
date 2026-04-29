@@ -1,75 +1,63 @@
 # Project Definition
 
 ## Project Name
-BOB Restaurant Operations Platform
+BOB Restaurant Management System
 
 ## Purpose
-Build a single platform that helps restaurants manage floor layouts, reservations, table service, menu operations, and staff workflows in one place.
+Provide a web platform for day-to-day restaurant operations where staff can:
 
-The platform reduces manual coordination between front-of-house and back-of-house by providing a shared real-time operational view.
+- manage restaurants, floors, and table layouts,
+- create and manage reservations,
+- run table service and kitchen ticket workflows,
+- maintain opening hours and menu catalog data,
+- manage users and worker assignments.
+
+The current product focus is operational consistency across manager, waiter, kitchen, and admin workflows rather than advanced reporting or external integrations.
 
 ## Scope
 
 ### In Scope
 - Multi-restaurant and multi-floor management
 - Visual floor editor with known floor objects (tables, doors, stairs, toilets, kitchen blocks, etc.)
-- Reservation management (guest-facing and staff-facing)
-- Waiter workflow for table orders and order-line updates
-- Basic worker and role management (manager, waiter, chef)
-- Menu/category management and price updates
-- Opening hours management
+- Reservation creation, update, deletion, and timeline/statistics views
+- Waiter workflow for table orders, order lines, and local payment logging (single and split)
+- Kitchen queue workflow with order-line lifecycle states
+- User and worker management (ADMIN, MANAGER, STAFF) with assignment to restaurants
+- Menu folder/item management and price updates
+- Weekly opening hours and date-specific opening overrides
 - Persistent backend API + relational database + migration-based seed data
 
 ### Out of Scope (Current Phase)
 - Full payment gateway integrations (card processors, terminal SDKs)
-- Advanced BI dashboards beyond core operational metrics
+- Advanced BI beyond the implemented reservation/queue/revenue summary views
 - Native mobile apps
-- Multi-language localization at enterprise scale
+- Customer self-service reservation links/portals (edit/cancel via tokenized links)
+- Stock/allergy/station-based kitchen planning features
 
 ## Objectives (Measurable Targets)
 
-1. Reservation Completion Rate
-- Target: >= 90% of initiated reservation flows are completed successfully.
-- Measure: completed reservations / started reservation sessions.
-- Timeframe: within 8 weeks after production launch.
+1. Migration Alignment
+- Target: 100% of schema changes are delivered via Flyway and reflected in docs.
+- Measure: every merged migration has corresponding documentation update.
 
-2. Reservation Error Rate
-- Target: < 2% backend/API error responses on reservation endpoints.
-- Measure: count of 4xx/5xx reservation API responses / total reservation requests.
-- Timeframe: sustained for 4 consecutive weeks post-launch.
+2. Reservation Validity
+- Target: 100% of accepted reservations pass interval and opening-hours validation.
+- Measure: backend acceptance path only persists valid reservation windows.
 
-3. Waiter Order Entry Speed
-- Target: median time <= 45 seconds from table open to first submitted order line.
-- Measure: event timestamps in waiter workflow.
-- Timeframe: within 10 weeks post-launch.
+3. Order-Line Lifecycle Integrity
+- Target: 100% of persisted order-line statuses are in the supported lifecycle set.
+- Measure: database check constraint and API validation.
 
-4. Floor Layout Save Reliability
-- Target: >= 99% successful floor-layout save operations.
-- Measure: successful save responses / all save attempts.
-- Timeframe: sustained for 4 consecutive weeks.
+4. Core CRUD Reliability
+- Target: no known blocker defects in CRUD flows for restaurants, floors, objects, menu, workers, and opening-hours overrides.
+- Measure: regression checks on primary management screens and linked APIs.
 
-5. Data Consistency for Floor Objects
-- Target: 0 unsupported floor object types in production data.
-- Measure: nightly check against allowed object type list.
-- Timeframe: continuous.
-
-6. Menu Update Freshness
-- Target: menu item changes visible to waiter ordering UI in <= 5 seconds (p95).
-- Measure: time from manager save to waiter-side visibility.
-- Timeframe: within 12 weeks post-launch.
-
-7. System Availability
-- Target: >= 99.5% monthly availability for backend API.
-- Measure: uptime monitoring over calendar month.
-- Timeframe: from first production month onward.
-
-8. Migration Safety
-- Target: 100% successful Flyway migration runs across dev/staging/prod pipelines.
-- Measure: CI/CD migration execution results.
-- Timeframe: continuous.
+5. Authorization Baseline
+- Target: authenticated sessions are required for protected APIs; roles map to implemented UI areas.
+- Measure: login/token flow and role-based app navigation work in QA/demo environments.
 
 ## Success Criteria Summary
 The project is considered successful for Phase 1 if:
-- Core operational workflows (floor editing, reservations, table ordering) are adopted by staff.
-- All critical objective targets 1, 2, 3, and 4 are met for at least one full month.
-- No data integrity incidents are caused by schema/migration issues.
+- Core workflows (floor editing, reservations, waiter ordering, kitchen queue, opening-hours management) are stable and usable end to end.
+- Admin and manager workflows (user/worker/menu/restaurant management) are functional without manual database intervention.
+- Schema migrations remain reproducible, and documentation stays aligned with the actual persisted model.
